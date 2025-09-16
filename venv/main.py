@@ -3,8 +3,12 @@ from models.log_reg import Login
 from models.log_reg import Register
 from models.books import DisplayBooks
 from models.books import AddBook
+from models.books import BorrowBook
+from models.books import ReturnBook
+import database.library as db
 
 login = False
+current_user = None
 
 def menu():
     choice = input("\n--------Welcome to the Library System--------\n1. Login\n2. Register\n3. Exit\nSelect an option: ")
@@ -12,7 +16,7 @@ def menu():
 
 def homepage():
     if login_instance.authenticated:
-        choice = input("\n--------Welcome to the Library System--------\n1. Display Books\n2. Borrow a Book\n3. Return a Book\n4. Add Book\n5. Exit\nSelect an option: ")
+        choice = input("\n--------Welcome to the Library System--------\n1. Display Books\n2. Search Book\n3. Borrow a Book\n4. Return a Book\n5. My Borrow Record\n6. Borrowing record\n7. Add Book\n8. Delete Everything\n9. Exit\nSelect an option: ")
     else:
         menu()
     
@@ -21,14 +25,31 @@ def homepage():
             display_books_instance = DisplayBooks()
             display_books_instance.display()
         case "2":
-            print("Borrowing a book...")
+            bookSearch = input("Search Title: ")
+            display_books_instance = DisplayBooks()
+            display_books_instance.search_book(bookSearch)
         case "3":
-            print("Returning a book...")
+            bookID = input("Enter the Book ID to borrow: ")
+            borrow_book_instance = BorrowBook()
+            borrow_book_instance.borrow(current_user, bookID)
         case "4":
+            bookID = input("Enter the Book ID to return: ")
+            borrow_book_instance = ReturnBook()
+            borrow_book_instance.return_book(current_user, bookID)
+        case "5":
+            display_books_instance = DisplayBooks()
+            display_books_instance.show_my_records(current_user)
+        case "6":
+            display_books_instance = DisplayBooks()
+            display_books_instance.show_records()
+        case "7":
             print("Adding a book...")
             add_book_instance = AddBook()
             add_book_instance.add_to_db()
-        case "5":
+        case "8":
+            print("Dropping Tables...")
+            db.drop_book_tables()
+        case "9":
             print("Exiting to main menu...")
             global login
             login = False
@@ -57,6 +78,7 @@ if __name__ == "__main__":
                     username, password = user_login()
                     login_instance = Login(username, password)
                     if login_instance.authenticated:
+                        current_user = login_instance.studId
                         print("Login successful. Welcome to the library!")
                         login = True
                     else:

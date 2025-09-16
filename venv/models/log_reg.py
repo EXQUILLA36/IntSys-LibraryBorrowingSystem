@@ -4,11 +4,14 @@ class Login:
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.studId = None
 
         self.authenticated = self.authenticate(username, password)
         
     def authenticate(self, username, password):
-        if db.login_account(username, password):
+        result = db.login_account(username, password)
+        if result:
+            self.studId = result[0] 
             return True
         return False
     
